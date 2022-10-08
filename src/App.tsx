@@ -1,26 +1,71 @@
-import React from 'react';
-import logo from './logo.svg';
+import { useEffect, useState } from 'react'
 import './App.css';
 
-function App() {
+const getRandomColor = () =>{
+  const digits = ['0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F',];
+
+  const color = new Array(6)
+  .fill('')
+  .map(()=> digits[Math.floor((Math.random() * digits.length))])
+  .join('');
+
+  return `#${color}`;
+}
+
+enum Result{
+  Correct,
+  Wrong,
+}
+
+export default function App() {
+  const [color, setColor] = useState("");
+  const [answers, setAnswers] = useState<string[]>([]);
+  const [result, setResult] = useState<Result | undefined>(undefined);
+
+  const generateColors = ()=>{
+    const actualColor = getRandomColor();
+    setColor(actualColor);
+    setAnswers([actualColor, getRandomColor(), getRandomColor()]
+    .sort(() => 0.5 -  Math.random())
+    );
+  }
+
+  useEffect(() => {
+    generateColors();
+  }, [])
+
+  const handleAnswerClicked = (answer: string) =>{
+    if(answer === color){
+      setResult(Result.Correct);
+      generateColors();
+    }else{
+      setResult(Result.Wrong);
+    }
+  } 
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+  <>
+    <header>
+      <Title/>
+    </header>
+
+    <main>
+      <div className="app">
+          <div className="guess-me" style={{background : color}}>
+            {answers.map(answer => (<button onClick={() => handleAnswerClicked(answer)} className='row' key={answer}>{answer}</button>))}
+            {result === Result.Correct && <div className='correct'> Correct! </div>}
+            {result === Result.Wrong && <div className='wrong'> Wrong Answer! </div>}
+            </div>
+          </div>
+    </main>
+  </>
   );
 }
 
-export default App;
+function Title(){
+  return(
+    <h1 className='site-title'>Guess The Color!</h1>
+  );
+}
+
+
